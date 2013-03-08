@@ -4,8 +4,7 @@ enchant.dab.iris - Iris-in, Iris-out effect
 
 # VERSION
 
-<<<<<<< HEAD
-version 1.0
+version 1.1
 
 # DESCRIPTION
 
@@ -14,15 +13,6 @@ version 1.0
 This is an animation effect.
 
 Please see [Wicker Wings \[ja\]](http://home.wi-wi.jp/software/js_iris.enchant/) for more information.
-
-=======
-version 1.1
-
-# DESCRIPTION
-
-![screenshot](http:///home.wi-wi.jp/software/js_iris.enchant/images/iris-out.gif)
-
-Please see more information in [Wicker Wings \[ja\]](http://home.wi-wi.jp/software/js_iris.enchant/).
 
 # Constructor
 
@@ -34,23 +24,17 @@ Please see more information in [Wicker Wings \[ja\]](http://home.wi-wi.jp/softwa
  
  You may ommit All arguments. When they are ommitted, the arguments will be as the game-core's options.
  
->>>>>>> added functions to resume or reset
 # Options
 
 ## Methods
 
 - setCenter(x, y): the center of the iris' circle
-<<<<<<< HEAD
-- setTime(time, easing): duration and easing function
 - setColor(r, g, b, a): iris color and opacity
-- restart: restart the animation
-=======
 - setRadius(r): radius of the iris' circle
 - setTime(time, easing): duration and easing function
 - fillColor(r, g, b, a): iris color and opacity
 - restart: restart or resume the animation
 - resetCircle: reset the circle
->>>>>>> added functions to resume or reset
 
 ## Properties
 
@@ -70,21 +54,17 @@ game.fps=30;
 game.onload=function(){
     
     // create instance of Iris
-<<<<<<< HEAD
-  var iris=new Iris(game.width, game.height, game.fps);
-=======
-	var iris=new Iris(game.width, game.height, game.fps);
->>>>>>> added functions to resume or reset
-	
+    var iris=new Iris(game.width, game.height, game.fps);
+    
     // the effect will be set "iris-in"
-	iris.inout="in";
-	
-	// sprite will be removed after finished the animation.
-	iris.toRemove=true;
-	
-	// set the duration at 3 seconds and easing
-	iris.setTime(3, enchant.Easing.SIN_EASEIN);
-	
+    iris.inout="in";
+    
+    // sprite will be removed after finished the animation.
+    iris.toRemove=true;
+    
+    // set the duration at 3 seconds and easing
+    iris.setTime(3, enchant.Easing.SIN_EASEIN);
+    
     game.rootScene.addChild(iris);
 };
 
