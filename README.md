@@ -4,7 +4,7 @@ enchant.dab.iris - Iris-in, Iris-out effect
 
 # VERSION
 
-version 1.1
+version 1.2
 
 # DESCRIPTION
 
@@ -16,7 +16,7 @@ Please see [Wicker Wings \[ja\]](http://home.wi-wi.jp/software/js_iris.enchant/)
 
 # Constructor
 
- - new Iris(width, height, fps):
+ - new enchant.dab.Iris(width, height, fps):
  
  Width and height are the rectangle size which is surrounding the iris.
  
@@ -40,6 +40,10 @@ Please see [Wicker Wings \[ja\]](http://home.wi-wi.jp/software/js_iris.enchant/)
 
 - inout: String: "in" for iris-in, "out" for iris-out. default: "out".
 - toRemove: Boolean: if "true" is set, the sprite is removed from the scene. default: false.
+- irisWait: Boolean: if "true" is set, the animation is stopped. default: false.
+- width: Number:
+- height: Number:
+- touchEnabled: Boolean: To work 'touchstart', 'touchmove', 'touchend' Events. default: false.
 
 ```javascript
 // export 'dab' to use "new Iris()".
