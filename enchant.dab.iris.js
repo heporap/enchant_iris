@@ -1,109 +1,98 @@
 /**
  enchant.dab.Iris
- version 1.1
+ version 1.2
  
 Copyright (c) 2013 Wicker Wings
-http://www.wi-wi.jp/
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
- 
- usage
- 
- enchant();
- var iris = new enchant.dab.Iris(game.width, game.height, game.fps);
- scene.addChild(iris);
- 
- or
- 
- enchant('dab');
- var iris = new Iris(game.width, game.height, game.fps);
- scene.addChild(iris);
- 
 **/
  (function(enchant){
-if( !enchant ){
-	return;
-}
 if( !enchant.dab ){
 	enchant.dab  = {};
 }
 
-var _context,
-_irisX = 0,
-_irisY = 0,
-_irisRfrom = 0,
-_irisRto = -1,
-_irisRmax = 0,
-_irisTime = 0,
-_easing = enchant.Easing.Linear,
-_width = 0,
-_height = 0,
-_fps = 0,
-_irisRemove = false,
-_age = 0;
-
 function initialize(width, height, fps) {
 	enchant.Group.call(this);
 	
-	_width = width||enchant.Core.instance.width;
-	_height = height||enchant.Core.instance.height;
-	_fps=fps||enchant.Core.instance.fps;
+	this._irisEasing = enchant.Easing.Linear;
+	this._width = width||enchant.Core.instance.width;
+	this._height = height||enchant.Core.instance.height;
+	this._fps=fps||enchant.Core.instance.fps;
 	
-	var sprite = new Sprite(_width, _height);
-	var surface = new Surface(_width, _height);
-	sprite.image = surface;
-	_context = sprite.image.context;
+	this.sprite = new Sprite(this._width, this._height);
+	var surface = new Surface(this._width, this._height);
+	this.sprite.image = surface;
+	this.sprite.touchEnabled=false;
+	this._context = this.sprite.image.context;
 	
-	fillColor(0, 0, 0, 1.0);
-	setCenter(_width/2, _height/2);
-	setTime(2, enchant.Easing.LINEAR);
-	_irisIo = 'out';
+	fillColor.apply(this, this._fillColors);
+	setCenter.call(this, this._width/2, this._height/2);
+	setTime.call(this, 2, enchant.Easing.LINEAR);
 	
-	this.addChild(sprite);
+	calcRadius.call(this);
+	this._irisIo = 'out';
+	this._irisRfrom = this._irisRmax;
+	
+	this.addChild(this.sprite);
+	this.addEventListener('addedtoscene', preview);
 	this.addEventListener('enterframe', main);
 
 }
 
 function fillColor(r, g, b, a){
-	_context.fillStyle = color(r||0, g||0, b||0, a||1.0);
-	return this;
-}
-function strokeColor(r, g, b, a){
-	_context.strokeStyle = color(r||0, g||0, b||0, a||1.0);
+	this._fillColors[0]=r;
+	this._fillColors[1]=g;
+	this._fillColors[2]=b;
+	this._fillColors[3]=a;
+	this._context.fillStyle = color(r, g, b, a);
 	return this;
 }
 
 function setCenter(x, y){
-	_irisX = x;
-	_irisY = y;
+	this._irisX = x;
+	this._irisY = y;
 	calcRadius();
 	return this;
 }
 
 function setRadius(r){
-	_irisRto = r;
+	this._irisRto = r;
+	return this;
+}
+
+function setReverse(b){
+	this._irisReverse = b;
 	return this;
 }
 
 function restart(){
-	_age = 0;
+	this._age = 0;
+	return;
 }
 function resetCircle(){
-	_irisRto = -1;
-	calcRadius();
+	this._irisRto = -1;
+	this._irisRfrom=(this._irisIo==='out')?this._irisRmax:0;
 	return this;
 }
 
+function moveTime(x, y, t){
+	this._irisXfrom = this._irisX;
+	this._irisYfrom = this._irisY;
+	this._irisXto = x-this._irisXfrom;
+	this._irisYto = y-this._irisYfrom;
+	this._irisMoveStarttime = this._age;
+	this._irisMovetime = t*this._fps;
+	return this;
+}
 
 function setTime(t, easing){
-	_irisTime = t*_fps;
+	this._irisTime = t>0? t*this._fps: 1;
 	if( easing ){
-		_easing = easing;
+		this._irisEasing = easing;
 	}
 	return this;
 }
@@ -113,74 +102,173 @@ function color(r, g, b, a){
 }
 
 function calcRadius(){
-	var width = Math.max(_irisX, _width-_irisX);
-	var height = Math.max(_irisY, _height-_irisY);
-	_irisRfrom = _irisRmax = Math.sqrt( Math.pow(width, 2) + Math.pow(height, 2) );
+	var width = Math.max(this._irisX, this._width-this._irisX);
+	var height = Math.max(this._irisY, this._height-this._irisY);
+	this._irisRmax = Math.sqrt( Math.pow(width, 2) + Math.pow(height, 2) );
+}
+
+function preview(){
+	coordinateRadius.call(this);
+	draw.call(this);
 }
 
 function main(){
 	
-	_age++;
-	if( _age <= _irisTime ){
-		var irisR;
-		if( _irisRto===-1 ){
-			irisR = _irisRfrom;
-		}else{
-			irisR = ( _irisIo === 'out' )? _irisRfrom - _irisRto: _irisRto;
-		}
-		var r = _easing( _age, 0, irisR, _irisTime );
-		if( _irisIo === 'out' ){
-			r = _irisRfrom - r;
-		}
-		var ctx = _context;
+	if( this._irisWait ){
+		draw.call(this);
+		return;
+	}
+	
+	this._age++;
+	if( this._irisMovetime ){
+		coordinateCenter.call(this);
+	}
+	
+	if( this._age <= this._irisTime ){
+		coordinateRadius.call(this);
 		
-		ctx.globalCompositeOperation = 'source-over';
-		ctx.fillRect(0, 0, _width, _height);
-		
-		ctx.globalCompositeOperation = 'destination-out';
-		ctx.beginPath();
-		ctx.arc(_irisX, _irisY, r, 0, Math.PI*2, false);
-		ctx.fill();
-		
-	}else{
-		if( _irisRto !== -1 ){
-			_irisRfrom = _irisRto;
-			_irisRto = -1;
+	}else if( !this._irisMovetime ){
+		if( this._irisRto !== -1 ){
+			this._irisRfrom = this._irisRto;
+			this._irisRto = -1;
 		}
-		if( _irisRemove ){
+		if( this._irisRemove ){
 			this.scene.removeChild(this);
 		}
+		return;
 	}
+	draw.call(this);
 
+}
+function coordinateRadius(){
+	var irisR;
+	if( this._irisRto===-1 ){
+		irisR = this._irisRmax;
+	}else{
+		irisR = ( this._irisIo === 'out' )? this._irisRfrom - this._irisRto: this._irisRto;
+	}
+	var r = this._irisEasing( this._age, 0, irisR, this._irisTime );
+	if( this._irisIo === 'out' ){
+		r = this._irisRfrom - r;
+	}
+	this._irisR=r;
+}
+function coordinateCenter(){
+	if( this._irisX === this._irisXfrom+this._irisXto && this._irisY === this._irisYfrom+this._irisYto ){
+		this._irisMovetime = 0;
+	}else{
+		this._irisX = this._irisXfrom + this._irisEasing( this._age-this._irisMoveStarttime, 0, this._irisXto, this._irisMovetime );
+		this._irisY = this._irisYfrom + this._irisEasing( this._age-this._irisMoveStarttime, 0, this._irisYto, this._irisMovetime );
+	}
+}
+
+function draw(){
+	var ctx = this._context;
+	ctx.globalCompositeOperation = 'source-over';
+	if( this._irisReverse ){
+		ctx.clearRect(0, 0, this._width, this._height);
+	}else{
+		ctx.fillRect(0, 0, this._width, this._height);
+		ctx.globalCompositeOperation = 'destination-out';
+	}
+	ctx.beginPath();
+	ctx.arc(this._irisX, this._irisY, this._irisR, 0, Math.PI*2, false);
+	ctx.fill();
+	
 }
 
 enchant.dab.Iris = enchant.Class.create(enchant.Group, {
+	_sprite: null,
+	_context: null,
+	_irisX: 0,
+	_irisY: 0,
+	_irisRfrom: 0,
+	_irisRto: -1,
+	_irisR: 0,
+	_irisRmax: 0,
+	_irisTime: 0,
+	_irisIo: 'out',
+	_irisReverse: false,
+	_irisEasing: null,
+	_width: 0,
+	_height: 0,
+	_fps: 0,
+	_irisRemove: false,
+	_irisWait: false,
+	_age: 0,
+	_fillColors: [0,0,0,1.0],
 	initialize: initialize,
 	setColor: fillColor,
 	fillColor: fillColor,
-	strokeColor: strokeColor,
 	setCenter: setCenter,
 	setTime: setTime,
 	setRadius: setRadius,
 	resetCircle: resetCircle,
 	restart: restart,
+	setReverse: setReverse,
+	moveTime: moveTime,
+	irisWait: {
+		get: function(){
+			return this._irisWait;
+		},
+		set: function(w){
+			this._irisWait=w;
+		}
+	},
 	inout: {
 		get: function(){
-			return _irisIo;
+			return this._irisIo;
 		},
 		set: function(io){
-			_irisIo = io;
+			this._irisIo = io;
+			resetCircle.call(this);
 		}
 	},
 	toRemove: {
 		get: function(){
-			return _irisRemove;
+			return this._irisRemove;
 		},
 		set: function(m){
-			_irisRemove = m;
+			this._irisRemove = m;
+		}
+	},
+	irisBlur: {
+		get: function(){
+			return this._irisBlur;
+		},
+		set: function(b){
+			this._irisBlur = b;
+		}
+	},
+	width: {
+		get: function(){
+			return this._width;
+		},
+		set: function(width){
+			this._width=width;
+			this.sprite.width=width;
+			this.surface.width=width;
+			calcRadius.call(this);
+		}
+	},
+	height: {
+		get: function(){
+			return this._height;
+		},
+		set: function(height){
+			this._height=height;
+			this.sprite.height=height;
+			this.surface.height=height;
+			calcRadius.call(this);
+		}
+	},
+	touchEnabled: {
+		get: function(){
+			return this.sprite.touchEnabled;
+		},
+		set: function(b){
+			this.sprite.touchEnabled=b;
 		}
 	}
 });
-
-
 })(enchant);
