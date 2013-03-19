@@ -1,6 +1,6 @@
 /**
  enchant.dab.Iris
- version 1.3
+ version 1.3.1
  
 Copyright (c) 2013 Wicker Wings
 
@@ -70,7 +70,7 @@ function fillColor(r, g, b, a){
 function setCenter(x, y){
 	this._irisX = x;
 	this._irisY = y;
-	calcRadius();
+	calcRadius.call(this);
 	return this;
 }
 

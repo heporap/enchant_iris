@@ -4,7 +4,7 @@ enchant.dab.iris - Iris-in, Iris-out effect
 
 # VERSION
 
-version 1.3
+version 1.3.1
 
 # DESCRIPTION
 
