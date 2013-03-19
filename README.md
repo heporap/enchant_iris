@@ -45,6 +45,10 @@ Please see [Wicker Wings \[ja\]](http://home.wi-wi.jp/software/js_iris.enchant/)
 - height: Number:
 - touchEnabled: Boolean: To work 'touchstart', 'touchmove', 'touchend' Events. default: false.
 
+## EVENT Type
+
+- "irisend": The EventListener for when iris opend or closed.
+
 ```javascript
 // export 'dab' to use "new Iris()".
 // also you can use "use enchant()" and "new enchant.dab.Iris()"
@@ -68,6 +72,11 @@ game.onload=function(){
     
     // set the duration at 3 seconds and easing
     iris.setTime(3, enchant.Easing.SIN_EASEIN);
+    
+    // add EventListener for the end of animation.
+    iris.addEventListener('irisend', function(){
+        alert('iris finished');
+    });
     
     game.rootScene.addChild(iris);
 };

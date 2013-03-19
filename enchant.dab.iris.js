@@ -1,6 +1,6 @@
 /**
  enchant.dab.Iris
- version 1.2
+ version 1.3
  
 Copyright (c) 2013 Wicker Wings
 
@@ -18,14 +18,29 @@ if( !enchant.dab ){
 function initialize(width, height, fps) {
 	enchant.Group.call(this);
 	
+	this._irisX= 0;
+	this._irisY= 0;
+	this._irisRfrom= 0;
+	this._irisRto= -1;
+	this._irisR= 0;
+	this._irisRmax= 0;
+	this._irisTime= 0;
+	this._irisMovetime = 0;
+	this._irisIo= 'out';
+	this._irisReverse= false;
+	this._irisRemove= false;
+	this._irisWait= false;
+	this._age= 0;
+	
+	this._fillColors= [0,0,0,1.0];
 	this._irisEasing = enchant.Easing.Linear;
 	this._width = width||enchant.Core.instance.width;
 	this._height = height||enchant.Core.instance.height;
 	this._fps=fps||enchant.Core.instance.fps;
 	
+	this.surface = new Surface(this._width, this._height);
 	this.sprite = new Sprite(this._width, this._height);
-	var surface = new Surface(this._width, this._height);
-	this.sprite.image = surface;
+	this.sprite.image = this.surface;
 	this.sprite.touchEnabled=false;
 	this._context = this.sprite.image.context;
 	
@@ -132,13 +147,19 @@ function main(){
 			this._irisRfrom = this._irisRto;
 			this._irisRto = -1;
 		}
+		
 		if( this._irisRemove ){
 			this.scene.removeChild(this);
+			this.sprite=this.sprite.image=this.surface=this._context=null;
 		}
 		return;
 	}
 	draw.call(this);
-
+	
+	if( this._age===this._irisTime ){
+		this.dispatchEvent(new enchant.Event('irisend'));
+	}
+	
 }
 function coordinateRadius(){
 	var irisR;
@@ -178,25 +199,6 @@ function draw(){
 }
 
 enchant.dab.Iris = enchant.Class.create(enchant.Group, {
-	_sprite: null,
-	_context: null,
-	_irisX: 0,
-	_irisY: 0,
-	_irisRfrom: 0,
-	_irisRto: -1,
-	_irisR: 0,
-	_irisRmax: 0,
-	_irisTime: 0,
-	_irisIo: 'out',
-	_irisReverse: false,
-	_irisEasing: null,
-	_width: 0,
-	_height: 0,
-	_fps: 0,
-	_irisRemove: false,
-	_irisWait: false,
-	_age: 0,
-	_fillColors: [0,0,0,1.0],
 	initialize: initialize,
 	setColor: fillColor,
 	fillColor: fillColor,
@@ -232,22 +234,14 @@ enchant.dab.Iris = enchant.Class.create(enchant.Group, {
 			this._irisRemove = m;
 		}
 	},
-	irisBlur: {
-		get: function(){
-			return this._irisBlur;
-		},
-		set: function(b){
-			this._irisBlur = b;
-		}
-	},
 	width: {
 		get: function(){
 			return this._width;
 		},
 		set: function(width){
 			this._width=width;
-			this.sprite.width=width;
-			this.surface.width=width;
+			this.sprite.width=this._width;
+			this.surface.width=this._width;
 			calcRadius.call(this);
 		}
 	},
@@ -257,8 +251,8 @@ enchant.dab.Iris = enchant.Class.create(enchant.Group, {
 		},
 		set: function(height){
 			this._height=height;
-			this.sprite.height=height;
-			this.surface.height=height;
+			this.sprite.height=this._height;
+			this.surface.height=this._height;
 			calcRadius.call(this);
 		}
 	},
